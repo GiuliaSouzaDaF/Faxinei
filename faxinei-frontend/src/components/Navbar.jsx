@@ -29,7 +29,10 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
-    setUsuario(null);
+    
+    // Força a atualização da Navbar imediatamente na aba atual
+    window.dispatchEvent(new Event('storage'));
+    
     navigate('/login');
   };
 
@@ -60,7 +63,7 @@ export default function Navbar() {
             <>
               {/* Mostra apenas o primeiro nome para ficar elegante */}
               <span className="text-gray-600 font-medium hidden md:inline">
-                Olá, <span className="text-faxinei-ciano font-semibold">{usuario.nome.split(' ')[0]}</span>
+                Olá, <span className="text-faxinei-ciano font-semibold">{usuario.nome?.split(' ')[0]}</span>
               </span>
               
               <Link to="/painel" className="text-gray-600 hover:text-faxinei-ciano font-medium transition-colors">

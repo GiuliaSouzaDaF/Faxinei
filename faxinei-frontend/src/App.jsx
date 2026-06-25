@@ -1,4 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; 
+
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Cadastro from './pages/Cadastro';
@@ -23,6 +26,19 @@ function App() {
             <Route path="/sobre" element={<Sobre />} />
           </Routes>
         </main>
+
+        <ToastContainer 
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
       </div>
     </BrowserRouter>
   );

@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-toastify'; 
 
 export default function Painel() {
   const navigate = useNavigate();
   const [agendamentos, setAgendamentos] = useState([]);
   const [carregando, setCarregando] = useState(true);
-
-  // Estados para o Modal de Editar Horário
   const [agendamentoEditando, setAgendamentoEditando] = useState(null);
   const [novaData, setNovaData] = useState('');
   
@@ -48,28 +47,24 @@ export default function Painel() {
   const alterarStatus = async (id, novoStatus) => {
     if (!window.confirm(`Tem certeza que deseja marcar este serviço como ${novoStatus}?`)) {
       return;
-    }
-
+    } 
     try {
-      // Dispara a requisição para a rota PUT do Backend
       const resposta = await axios.put(`http://localhost:3000/api/agendamentos/${id}/status`, 
         { status: novoStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      // Atualiza a lista no estado do React em tempo real
       setAgendamentos(agendamentos.map(ag => 
         ag.id === id ? { ...ag, status: novoStatus } : ag
       ));
 
-      alert(resposta.data.mensagem || `Serviço atualizado para ${novoStatus}!`);
+      toast.success(resposta.data.mensagem || `Serviço atualizado para ${novoStatus}!`);
     } catch (erro) {
       console.error('Erro ao alterar status:', erro);
-      alert(erro.response?.data?.erro || 'Não foi possível alterar o status do serviço.');
+      toast.error(erro.response?.data?.erro || 'Não foi possível alterar o status do serviço.');
     }
   };
 
-  // FUNÇÃO DO BOTÃO: SALVAR REAGENDAMENTO
   const salvarNovaData = async (e) => {
     e.preventDefault();
     try {
@@ -78,18 +73,17 @@ export default function Painel() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Atualiza a nova data na tela
       setAgendamentos(agendamentos.map(ag => 
         ag.id === agendamentoEditando.id ? { ...ag, data_agendamento: novaData } : ag
       ));
       
-      setAgendamentoEditando(null); // Fecha o modal de edição
-      alert(resposta.data.mensagem || 'Horário atualizado com sucesso!');
+      setAgendamentoEditando(null); 
+      toast.success(resposta.data.mensagem || 'Horário updated com sucesso!');
     } catch (erro) {
       console.error('Erro ao reagendar:', erro);
-      alert(erro.response?.data?.erro || 'Erro ao reagendar o serviço.');
+      toast.error(erro.response?.data?.erro || 'Erro ao reagendar o serviço.');
     }
-  };
+  }; 
 
   const formatarData = (dataSql) => {
     const data = new Date(dataSql);
@@ -129,7 +123,7 @@ export default function Painel() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-10 text-center">
           <p className="text-gray-500 mb-4 text-lg">Você ainda não possui nenhum agendamento.</p>
         </div>
-      ) : (
+      ) : ( 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {agendamentos.map((agendamento) => (
             <div key={agendamento.id} className="bg-white rounded-xl shadow-md p-6 border-l-4 border-faxinei-ciano flex flex-col">
@@ -190,7 +184,7 @@ export default function Painel() {
             </div>
           ))}
         </div>
-      )}
+      )}  
 
       {/* MODAL DE ALTERAR HORÁRIO */}
       {agendamentoEditando && (
@@ -227,5 +221,5 @@ export default function Painel() {
       )}
 
     </div>
-  );
+  ); 
 }

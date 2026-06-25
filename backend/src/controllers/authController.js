@@ -57,7 +57,13 @@ export const login = async (req, res) => {
     const { email, senha } = req.body;
 
     try {
-        const [usuarios] = await pool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+        // Buscamos o usuário e também os dados da tabela perfil_prestador (caso ele seja prestador)
+        const [usuarios] = await pool.query(`
+            SELECT u.*, p.preco_servico, p.descricao, p.horario_atendimento 
+            FROM usuarios u
+            LEFT JOIN perfil_prestador p ON u.id = p.usuario_id
+            WHERE u.email = ?
+        `, [email]);
         
         if (usuarios.length === 0) {
             return res.status(401).json({ erro: 'E-mail ou senha inválidos.' });
@@ -76,6 +82,7 @@ export const login = async (req, res) => {
             { expiresIn: '24h' }
         );
 
+        // Agora enviamos TODOS os dados necessários para o Frontend salvar no localStorage
         return res.json({
             mensagem: 'Login realizado com sucesso!',
             token,
@@ -83,7 +90,12 @@ export const login = async (req, res) => {
                 id: usuario.id,
                 nome: usuario.nome,
                 email: usuario.email,
-                tipo: usuario.tipo
+                tipo: usuario.tipo,
+                telefone: usuario.telefone,          // 👈 Adicionado
+                endereco: usuario.endereco,          // 👈 Adicionado
+                preco_servico: usuario.preco_servico, // 👈 Adicionado (para prestadores)
+                descricao: usuario.descricao,         // 👈 Adicionado (para prestadores)
+                horario_atendimento: usuario.horario_atendimento // 👈 Adicionado (para prestadores)
             }
         });
 

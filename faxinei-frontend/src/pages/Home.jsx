@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 import axios from 'axios';
 
 export default function Home() {
@@ -7,10 +9,8 @@ export default function Home() {
   const [prestadores, setPrestadores] = useState([]);
   const [carregando, setCarregando] = useState(true);
   
-  // Estado que guarda o texto digitado na barra de pesquisa
   const [busca, setBusca] = useState('');
 
-  // Estado para controlar o modal de agendamento
   const [prestadorSelecionado, setPrestadorSelecionado] = useState(null);
   const [dataAgendamento, setDataAgendamento] = useState('');
   const [erroModal, setErroModal] = useState('');
@@ -19,12 +19,9 @@ export default function Home() {
   const usuarioLocal = localStorage.getItem('usuario');
   const usuario = usuarioLocal ? JSON.parse(usuarioLocal) : null;
 
-  // Função principal que busca os dados no Backend
   const carregarPrestadores = async (termoDeBusca = '') => {
     setCarregando(true);
     try {
-      // Se tiver termo de busca, envia como query param (?endereco=...)
-      // Se não tiver, a URL fica limpa e o backend traz TODOS do banco
       const url = termoDeBusca 
         ? `http://localhost:3000/api/usuarios/prestadores?endereco=${encodeURIComponent(termoDeBusca)}`
         : 'http://localhost:3000/api/usuarios/prestadores';
@@ -38,56 +35,55 @@ export default function Home() {
     }
   };
 
-  // Executa uma única vez assim que a tela abre, listando TODOS os prestadores
   useEffect(() => {
     carregarPrestadores();
   }, []);
 
-  // Função disparada quando o cliente clica no botão "Buscar" ou dá Enter
   const handleFiltrar = (e) => {
     e.preventDefault();
     carregarPrestadores(busca);
   };
 
-  // Limpa o filtro e exibe a lista completa de novo
   const handleLimparFiltro = () => {
     setBusca('');
     carregarPrestadores('');
   };
 
   const abrirModal = (prestador) => {
-    if (!usuario) {
-      alert('Você precisa estar logado para contratar um serviço.');
-      navigate('/login');
-      return;
-    }
-    if (usuario.tipo !== 'cliente') {
-      alert('Apenas contas de Cliente podem contratar serviços.');
-      return;
-    }
-    setErroModal('');
-    setSucessoModal('');
-    setDataAgendamento('');
-    setPrestadorSelecionado(prestador);
-  };
+  if (!usuario) {
+    toast.warn('Você precisa estar logado para contratar um serviço.'); // Alerta de aviso amarelo
+    navigate('/login');
+    return;
+  }
+  if (usuario.tipo !== 'cliente') {
+    toast.error('Apenas contas de Cliente podem contratar serviços.'); // Alerta de erro vermelho
+    return;
+  }
+  setErroModal('');
+  setSucessoModal('');
+  setDataAgendamento('');
+  setPrestadorSelecionado(prestador);
+};
 
   const handleContratar = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post('http://localhost:3000/api/agendamentos', {
-        prestador_id: prestadorSelecionado.id,
-        data_agendamento: dataAgendamento
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+  e.preventDefault();
+  try {
+    const token = localStorage.getItem('token');
+    await axios.post('http://localhost:3000/api/agendamentos', {
+      prestador_id: prestadorSelecionado.id,
+      data_agendamento: dataAgendamento
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-      setSucessoModal('Serviço agendado com sucesso!');
-      setTimeout(() => setPrestadorSelecionado(null), 2000);
-    } catch (erro) {
-      setErroModal(erro.response?.data?.erro || 'Erro ao agendar serviço.');
-    }
-  };
+    toast.success('Serviço agendado com sucesso! 🎉');
+    
+    setPrestadorSelecionado(null);
+  } catch (erro) {
+    const mensagemErro = erro.response?.data?.erro || 'Erro ao agendar serviço.';
+    toast.error(mensagemErro);
+  }
+};
 
   return (
     <div className="container mx-auto px-4 py-8">
