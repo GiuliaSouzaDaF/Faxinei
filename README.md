@@ -8,7 +8,7 @@ O **Faxinei.** é uma plataforma web moderna desenvolvida para desburocratizar e
 ### Para Clientes
 * **Busca Inteligente:** Encontre prestadores filtrando por localização/bairro diretamente na página inicial.
 * **Agendamento Descomplicado:** Escolha o profissional ideal, visualize o preço base e selecione data e hora no sistema.
-* **Sistema de Avaliações (Estrelas):** Avalie os serviços concluídos com notas de 1 a 5 e deixe depoimentos reais.
+
 
 ### Para Prestadores de Serviço
 * **Gestão de Perfil:** Controle total sobre suas informações, descrição profissional, preço cobrado e horários de atendimento.
