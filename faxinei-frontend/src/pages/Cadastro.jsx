@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-toastify'; // 🔥 IMPORTAÇÃO ADICIONADA AQUI
 
 export default function Cadastro() {
   const navigate = useNavigate();
@@ -25,30 +26,37 @@ export default function Cadastro() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErro('');
-    setCarregando(true);
-
+    setCarregando(true); // 🔥 Ativa o carregamento no botão
+    setErro(''); // Limpa erros antigos
+    
     try {
       await axios.post('http://localhost:3000/api/auth/registrar', formData);
       
-      alert('Cadastro realizado com sucesso!');
-      navigate('/login');
+      // 🔥 Notificação LINDA e estilizada rodando perfeitamente:
+      toast.success('🎉 Conta criada com sucesso! Seja bem-vindo ao Faxinei. ✨');
+      
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+
     } catch (error) {
-      setErro(error.response?.data?.erro || 'Ocorreu um erro ao realizar o cadastro.');
+      const mensagemErro = error.response?.data?.erro || 'Erro ao realizar o cadastro. Verifique os dados.';
+      setErro(mensagemErro); // Mantém o aviso na tela se quiser
+      toast.error(mensagemErro); // Mostra o toast vermelho estilizado
     } finally {
-      setCarregando(false);
+      setCarregando(false); // 🔥 Desativa o carregamento
     }
   };
 
   return (
     <div className="container mx-auto px-4 py-8 flex justify-center">
-      <div className="bg-faxinei-branco w-full max-w-2xl rounded-xl shadow-lg p-8 border-t-4 border-faxinei-ciano">
+      <div className="bg-white w-full max-w-2xl rounded-xl shadow-lg p-8 border-t-4 border-faxinei-ciano">
         <h2 className="text-3xl font-bold text-gray-800 text-center mb-6">
           Crie sua conta no Faxinei
         </h2>
 
         {erro && (
-          <div className="bg-red-100 text-red-700 p-3 rounded-lg mb-6 text-center">
+          <div className="bg-red-100 text-red-700 p-3 rounded-lg mb-6 text-center font-medium text-sm">
             {erro}
           </div>
         )}

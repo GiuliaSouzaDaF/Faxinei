@@ -9,6 +9,8 @@ export default function Painel() {
   const [carregando, setCarregando] = useState(true);
   const [agendamentoEditando, setAgendamentoEditando] = useState(null);
   const [novaData, setNovaData] = useState('');
+  const [modalConcluir, setModalConcluir] = useState({ aberto: false, id: null });
+  const [modalCancelar, setModalCancelar] = useState({ aberto: false, id: null });
   
   const usuarioLocal = localStorage.getItem('usuario');
   const usuario = usuarioLocal ? JSON.parse(usuarioLocal) : null;
@@ -43,25 +45,45 @@ export default function Painel() {
 
   if (!usuario) return null;
 
-  // FUNÇÃO DO BOTÃO: CONCLUIR OU CANCELAR AGENDAMENTO
-  const alterarStatus = async (id, novoStatus) => {
-    if (!window.confirm(`Tem certeza que deseja marcar este serviço como ${novoStatus}?`)) {
-      return;
-    } 
+  const executarConclusao = async () => {
+    const id = modalConcluir.id;
+    setModalConcluir({ aberto: false, id: null });
+    if (!id) return;
+    
     try {
-      const resposta = await axios.put(`http://localhost:3000/api/agendamentos/${id}/status`, 
-        { status: novoStatus },
+      await axios.put(`http://localhost:3000/api/agendamentos/${id}/status`, 
+        { status: 'concluido' },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      setAgendamentos(agendamentos.map(ag => 
-        ag.id === id ? { ...ag, status: novoStatus } : ag
-      ));
+      setAgendamentos((prev) => 
+        prev.map(ag => ag.id === id ? { ...ag, status: 'concluido' } : ag)
+      );
 
-      toast.success(resposta.data.mensagem || `Serviço atualizado para ${novoStatus}!`);
+      toast.success('✨ Excelente! Serviço marcado como concluído com sucesso! 🧹👏');
     } catch (erro) {
-      console.error('Erro ao alterar status:', erro);
-      toast.error(erro.response?.data?.erro || 'Não foi possível alterar o status do serviço.');
+      toast.error(erro.response?.data?.erro || 'Erro ao concluir o serviço.');
+    }
+  };
+
+  const executarCancelamento = async () => {
+    const id = modalCancelar.id;
+    setModalCancelar({ aberto: false, id: null });
+    if (!id) return;
+    
+    try {
+      await axios.put(`http://localhost:3000/api/agendamentos/${id}/status`, 
+        { status: 'cancelado' },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setAgendamentos((prev) => 
+        prev.map(ag => ag.id === id ? { ...ag, status: 'cancelado' } : ag)
+      );
+
+      toast.warn('Registro atualizado: O agendamento foi cancelado. 📝');
+    } catch (erro) {
+      toast.error(erro.response?.data?.erro || 'Erro ao cancelar o serviço.');
     }
   };
 
@@ -78,7 +100,7 @@ export default function Painel() {
       ));
       
       setAgendamentoEditando(null); 
-      toast.success(resposta.data.mensagem || 'Horário updated com sucesso!');
+      toast.success(resposta.data.mensagem || 'Horário alterado com sucesso!');
     } catch (erro) {
       console.error('Erro ao reagendar:', erro);
       toast.error(erro.response?.data?.erro || 'Erro ao reagendar o serviço.');
@@ -148,7 +170,7 @@ export default function Painel() {
                 </p>
               </div>
 
-              {/* BOTÕES DE AÇÃO INTERATIVOS */}
+              {/* BOTÕES DE AÇÃO INTERATIVOS MODIFICADOS */}
               <div className="flex justify-end space-x-3 mt-auto pt-3 border-t border-gray-100">
                 
                 {/* 1. Cliente pode alterar o horário do serviço pendente */}
@@ -161,20 +183,20 @@ export default function Painel() {
                   </button>
                 )}
 
-                {/* 2. Ambos podem cancelar enquanto estiver pendente */}
+                {/* 2. Ambos podem cancelar enquanto estiver pendente - Abre o Modal de Cancelar */}
                 {agendamento.status === 'pendente' && (
                   <button 
-                    onClick={() => alterarStatus(agendamento.id, 'cancelado')}
+                    onClick={() => setModalCancelar({ aberto: true, id: agendamento.id })}
                     className="text-sm bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg font-semibold transition-colors"
                   >
                     Cancelar
                   </button>
                 )}
 
-                {/* 3. Só o prestador pode concluir o serviço pendente */}
+                {/* 3. Só o prestador pode concluir o serviço pendente - Abre o Modal de Concluir */}
                 {usuario.tipo === 'prestador' && agendamento.status === 'pendente' && (
                   <button 
-                    onClick={() => alterarStatus(agendamento.id, 'concluido')}
+                    onClick={() => setModalConcluir({ aberto: true, id: agendamento.id })}
                     className="text-sm bg-faxinei-verde-agua hover:bg-faxinei-ciano text-white px-4 py-2 rounded-lg font-bold transition-colors shadow-sm"
                   >
                     Concluir Serviço
@@ -216,6 +238,70 @@ export default function Painel() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 🔥 MODAL DE CONFIRMAÇÃO DE CONCLUSÃO */}
+      {modalConcluir.aberto && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 text-center">
+            <div className="w-16 h-16 bg-blue-50 text-faxinei-ciano rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+              🧹
+            </div>
+            <h3 className="text-2xl font-black text-gray-800 mb-2">Finalizar Faxina?</h3>
+            <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+              O serviço foi realmente finalizado? <br />
+              Esta ação confirmará para o cliente que tudo está pronto.
+            </p>
+            <div className="flex space-x-3">
+              <button 
+                type="button" 
+                onClick={() => setModalConcluir({ aberto: false, id: null })} 
+                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+              >
+                Voltar
+              </button>
+              <button 
+                type="button" 
+                onClick={executarConclusao} 
+                className="flex-1 bg-faxinei-ciano text-white py-3 rounded-xl font-bold hover:bg-faxinei-verde-agua transition-colors shadow-md"
+              >
+                Sim, finalizar!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🔥 MODAL DE CONFIRMAÇÃO DE CANCELAMENTO */}
+      {modalCancelar.aberto && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 text-center">
+            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+              ⚠️
+            </div>
+            <h3 className="text-2xl font-black text-gray-800 mb-2">Cancelar Agendamento?</h3>
+            <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+              Tem certeza que deseja cancelar? <br />
+              <span className="text-red-500 font-semibold">Esta ação removerá este horário da sua grade de faxinas.</span>
+            </p>
+            <div className="flex space-x-3">
+              <button 
+                type="button" 
+                onClick={() => setModalCancelar({ aberto: false, id: null })} 
+                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+              >
+                Não, manter
+              </button>
+              <button 
+                type="button" 
+                onClick={executarCancelamento} 
+                className="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold hover:bg-red-700 transition-colors shadow-md"
+              >
+                Sim, cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}
