@@ -43,7 +43,7 @@ O banco de dados armazena as informações através de relações seguras e regr
 * `usuarios`: Gerencia credenciais, senhas criptografadas, contatos e o tipo de conta (`cliente` ou `prestador`).
 * `perfil_prestador`: Armazena dados específicos do profissional (preço base, descrição e horários).
 * `agendamentos`: Controla o fluxo de serviços prestados e status de horários entre clientes e prestadores.
-* `avaliacoes`: Registra a nota em estrelas (1 a 5) de serviços estritamente concluídos.
+
 
 ---
 
