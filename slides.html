@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Jornada Faxinei - Apresentação Premium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* 1. DESIGN SYSTEM & VARIÁVEIS ACCENT */
+        :root {
+            --bg-dark: #020617;
+            --bg-card: rgba(15, 23, 42, 0.65);
+            --bg-nav: rgba(15, 23, 42, 0.85);
+            --primary: #22d3ee;
+            --primary-hover: #67e8f9;
+            --primary-glow: rgba(34, 211, 238, 0.2);
+            --secondary: #10b981;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --error: #f43f5e;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        body {
+            background-color: #000212;
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 2. ESTRUTURA DOS SLIDES (1280x720 Fixo Premium) */
+        .slide-deck {
+            width: 1280px;
+            height: 720px;
+            position: relative;
+            perspective: 1500px;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; 
+            left: 0;
+            width: 100%; 
+            height: 100%;
+            background: radial-gradient(circle at top right, #0f172a 0%, #020617 100%);
+            border-radius: 24px;
+            padding: 60px 80px;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.95) rotateY(-5deg);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--glass-border);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1) rotateY(0);
+            z-index: 2;
+        }
+
+        .slide.prev {
+            opacity: 0;
+            transform: scale(0.95) rotateY(5deg);
+        }
+
+        /* 3. SIMULADOR DE SITE / NAVBAR */
+        .navbar {
+            position: fixed;
+            top: 25px;
+            width: 960px;
+            height: 64px;
+            background: var(--bg-nav);
+            backdrop-filter: blur(16px);
+            border-radius: 50px;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 35px;
+            z-index: 1000;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .logo { 
+            font-size: 24px; 
+            font-weight: 800; 
+            color: var(--text-main); 
+            letter-spacing: -0.5px;
+        }
+        .logo span { color: var(--primary); }
+
+        .nav-links { 
+            display: flex; 
+            gap: 24px; 
+            list-style: none; 
+        }
+        .nav-item { 
+            font-size: 14px; 
+            font-weight: 600; 
+            color: var(--text-dim); 
+            cursor: pointer; 
+            transition: all 0.3s;
+            position: relative;
+            padding: 4px 0;
+        }
+        .nav-item.active, .nav-item:hover { 
+            color: var(--primary); 
+        }
+
+        /* 4. COMPONENTES DE TEXTO E CORE LAYOUT */
+        .slide-title {
+            font-size: 44px;
+            font-weight: 800;
+            margin-bottom: 35px;
+            background: linear-gradient(to right, #f8fafc, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .slide-title::before {
+            content: '';
+            width: 6px; 
+            height: 44px;
+            background: var(--primary);
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 35px;
+            flex-grow: 1;
+            align-items: center;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            padding: 35px;
+            border-radius: 20px;
+            transition: all 0.5s ease;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .card h3 { 
+            color: var(--primary); 
+            font-size: 24px; 
+            margin-bottom: 15px; 
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .card p { 
+            color: var(--text-dim); 
+            font-size: 18px; 
+            line-height: 1.6; 
+        }
+
+        /* 5. SLIDE DE IMAGEM INTEIRA EXCLUSIVA */
+        .full-screen-mockup {
+            width: 100%;
+            height: 500px;
+            background: #020617;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px var(--primary-glow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mockup-bar {
+            height: 36px;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 8px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .mockup-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-1 { background: #ff5f56; }
+        .dot-2 { background: #ffbd2e; }
+        .dot-3 { background: #27c93f; }
+        .mockup-url {
+            margin-left: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-dim);
+            background: rgba(0,0,0,0.3);
+            padding: 2px 15px;
+            border-radius: 4px;
+            width: 300px;
+        }
+
+        .image-viewport {
+            flex-grow: 1;
+            background: #0b0f19;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .image-viewport img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* 6. LISTAS E ÍCONES */
+        .icon-list { list-style: none; }
+        .icon-list li { 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 15px; 
+            margin-bottom: 18px; 
+            color: var(--text-dim); 
+            font-size: 18px;
+            line-height: 1.5;
+        }
+        .icon-list i { color: var(--primary); margin-top: 5px; font-size: 18px; }
+        .icon-list i.fa-bug { color: var(--error); }
+
+        /* 7. CONTROLES E PROGRESSO */
+        .footer-navigation {
+            position: fixed;
+            bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            z-index: 1000;
+        }
+
+        .btn-nav {
+            background: rgba(34, 211, 238, 0.08);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            width: 52px; 
+            height: 52px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-nav:hover { 
+            background: var(--primary); 
+            color: #020617;
+            box-shadow: 0 0 20px var(--primary-glow);
+            transform: scale(1.05);
+        }
+
+        .slide-counter { 
+            font-weight: 700; 
+            color: var(--primary); 
+            font-size: 16px; 
+            letter-spacing: 3px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* GLOW BACKGROUND EFFECT */
+        .radial-glow {
+            position: absolute;
+            width: 700px; 
+            height: 700px;
+            background: radial-gradient(circle, rgba(34, 211, 238, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            top: 50%; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="radial-glow"></div>
+
+    <nav class="navbar">
+        <div class="logo">Faxinei<span>.</span></div>
+        <ul class="nav-links">
+            <li class="nav-item active" onclick="goToSlide(0)">Início</li>
+            <li class="nav-item" onclick="goToSlide(1)">O Pedido</li>
+            <li class="nav-item" onclick="goToSlide(2)">A Solução</li>
+            <li class="nav-item" onclick="goToSlide(3)">Interface</li>
+            <li class="nav-item" onclick="goToSlide(4)">Melhorias</li>
+            <li class="nav-item" onclick="goToSlide(5)">Resolução</li>
+        </ul>
+    </nav>
+
+    <main class="slide-deck">
+
+        <div class="slide active">
+            <div style="text-align: center; margin: auto; z-index: 5;">
+                <h1 style="font-size: 96px; font-weight: 800; letter-spacing: -2px;">Faxinei<span>.</span></h1>
+                <p style="font-size: 26px; color: var(--text-dim); margin-top: 15px; font-weight: 400;">Apresentação da Jornada e Evolução do Projeto</p>
+                <div style="width: 120px; height: 4px; background: var(--primary); margin: 40px auto; border-radius: 10px;"></div>
+                <p style="font-size: 15px; color: var(--primary); letter-spacing: 1px; text-transform: uppercase;">Use as setas do teclado para navegar</p>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 class="slide-title">O que o cliente pediu?</h2>
+            <div class="content-grid">
+                <div class="card">
+                    <h3><i class="fa-solid fa-lightbulb"></i> A Proposta</h3>
+                    <p>O cliente necessitava de uma plataforma intuitiva capaz de conectar de forma direta e eficiente pessoas interessadas em contratar serviços de faxina a profissionais autônomos.</p>
+                </div>
+                <div class="card">
+                    <h3><i class="fa-solid fa-user-shield"></i> Regras e Restrições</h3>
+                    <ul class="icon-list">
+                        <li><i class="fa-solid fa-circle-check"></i> Criação de perfis dedicados e exclusivos para Clientes e Prestadores.</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Blindagem de dados sensíveis: endereço ocultado até a contratação.</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Controle total do profissional sobre valores cobrados e sua própria agenda.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 class="slide-title">A Solução Desenvolvida</h2>
+            <div class="content-grid">
+                <div class="card">
+                    <h3><i class="fa-solid fa-gears"></i> Ecossistema Integrado</h3>
+                    <p>Construímos uma aplicação completa e dinâmica focada em usabilidade imediata, garantindo respostas rápidas, seguras e fluxos claros para ambos os lados.</p>
+                </div>
+                <div class="card">
+                    <h3><i class="fa-solid fa-star"></i> Funcionalidades Core</h3>
+                    <ul class="icon-list">
+                        <li><i class="fa-solid fa-magnifying-glass-location"></i> Filtro inteligente de profissionais por cidade e bairro.</li>
+                        <li><i class="fa-solid fa-sliders"></i> Painel de gerenciamento com atualização de status em tempo real.</li>
+                        <li><i class="fa-solid fa-lock"></i> Autenticação criptografada com controle seguro de sessões.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 class="slide-title">O Projeto Rodando</h2>
+            <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div class="full-screen-mockup">
+                    <div class="mockup-bar">
+                        <div class="mockup-dot dot-1"></div>
+                        <div class="mockup-dot dot-2"></div>
+                        <div class="mockup-dot dot-3"></div>
+                        <div class="mockup-url">localhost:5173/dashboard</div>
+                    </div>
+                    <div class="image-viewport">
+                        <img src="projetorodando.png" alt="Tela do Sistema Faxinei">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 class="slide-title">Feedbacks e Evolução</h2>
+            <div class="content-grid">
+                <div class="card">
+                    <h3><i class="fa-solid fa-comments"></i> Experiência do Usuário</h3>
+                    <p>O retorno inicial apontou excelente velocidade na busca, mas revelou oportunidades para tornar a navegação e alertas mais fluidos e modernos.</p>
+                </div>
+                <div class="card" style="border-left: 4px solid var(--secondary);">
+                    <h3><i class="fa-solid fa-circle-arrow-up"></i> Melhorias Aplicadas</h3>
+                    <ul class="icon-list">
+                        <li><i class="fa-solid fa-wand-magic-sparkles"></i> Substituição de alertas estáticos por notificações animadas (Toasts).</li>
+                        <li><i class="fa-solid fa-square-check"></i> Criação de modais elegantes para confirmação de ações críticas.</li>
+                        <li><i class="fa-solid fa-dollar-sign"></i> Formatação de valores adaptada perfeitamente ao padrão Real (R$).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 class="slide-title">Resolução de Desafios</h2>
+            <div class="content-grid">
+                <div class="card" style="border-left: 4px solid var(--error);">
+                    <h3><i class="fa-solid fa-bug"></i> Impedimentos Encontrados</h3>
+                    <p>Durante os testes integrados, o painel sofria interrupções ao recarregar a lista de serviços e notificações importantes falhavam por falta de injeção de estilo.</p>
+                </div>
+                <div class="card" style="border-left: 4px solid var(--secondary);">
+                    <h3><i class="fa-solid fa-screwdriver-wrench"></i> Ação Corretiva</h3>
+                    <p>Centralizamos a execução das funções de atualização, garantindo sincronia total com o backend e adicionamos tratamento preventivo de falhas (Try/Catch).</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="footer-navigation">
+        <button class="btn-nav" onclick="navigateSlide(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+        <span class="slide-counter" id="tracker">01 / 06</span>
+        <button class="btn-nav" onclick="navigateSlide(1)"><i class="fa-solid fa-chevron-right"></i></button>
+    </footer>
+
+    <script>
+        let indexActive = 0;
+        const allSlides = document.querySelectorAll('.slide');
+        const navigationItems = document.querySelectorAll('.nav-item');
+        const totalSlidesCount = allSlides.length;
+
+        function navigateSlide(direction) {
+            allSlides[indexActive].classList.remove('active');
+            allSlides[indexActive].classList.add('prev');
+            navigationItems[indexActive].classList.remove('active');
+
+            indexActive = (indexActive + direction + totalSlidesCount) % totalSlidesCount;
+
+            allSlides[indexActive].classList.remove('prev');
+            allSlides[indexActive].classList.add('active');
+            navigationItems[indexActive].classList.add('active');
+
+            refreshUI();
+        }
+
+        function goToSlide(targetIndex) {
+            allSlides[indexActive].classList.remove('active');
+            navigationItems[indexActive].classList.remove('active');
+            
+            indexActive = targetIndex;
+            
+            allSlides[indexActive].classList.add('active');
+            navigationItems[indexActive].classList.add('active');
+            refreshUI();
+        }
+
+        function refreshUI() {
+            const currentStr = (indexActive + 1).toString().padStart(2, '0');
+            const totalStr = totalSlidesCount.toString().padStart(2, '0');
+            document.getElementById('tracker').textContent = `${currentStr} / ${totalStr}`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') navigateSlide(1);
+            if (e.key === 'ArrowLeft') navigateSlide(-1);
+        });
+    </script>
+</body>
+</html>
