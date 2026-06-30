@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify'; 
+import { ModalAvaliacao } from '../components/ModalAvaliacao';
 
 export default function Painel() {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ export default function Painel() {
   const [novaData, setNovaData] = useState('');
   const [modalConcluir, setModalConcluir] = useState({ aberto: false, id: null });
   const [modalCancelar, setModalCancelar] = useState({ aberto: false, id: null });
+  
+  const [agendamentoParaAvaliar, setAgendamentoParaAvaliar] = useState(null);
   
   const usuarioLocal = localStorage.getItem('usuario');
   const usuario = usuarioLocal ? JSON.parse(usuarioLocal) : null;
@@ -45,7 +48,7 @@ export default function Painel() {
 
   if (!usuario) return null;
 
-  const executarConclusao = async () => {
+  const ejecutarConclusao = async () => {
     const id = modalConcluir.id;
     setModalConcluir({ aberto: false, id: null });
     if (!id) return;
@@ -66,7 +69,7 @@ export default function Painel() {
     }
   };
 
-  const executarCancelamento = async () => {
+  const ejecutarCancelamento = async () => {
     const id = modalCancelar.id;
     setModalCancelar({ aberto: false, id: null });
     if (!id) return;
@@ -81,7 +84,7 @@ export default function Painel() {
         prev.map(ag => ag.id === id ? { ...ag, status: 'cancelado' } : ag)
       );
 
-      toast.warn('Registro atualizado: O agendamento foi cancelado. 📝');
+      toast.warn('Registro updated: O agendamento foi cancelado. 📝');
     } catch (erro) {
       toast.error(erro.response?.data?.erro || 'Erro ao cancelar o serviço.');
     }
@@ -107,6 +110,13 @@ export default function Painel() {
     }
   }; 
 
+  
+  const handleAvaliacaoSucesso = (idAgendamento) => {
+    setAgendamentos((prev) =>
+      prev.map(ag => ag.id === idAgendamento ? { ...ag, status: 'avaliado' } : ag)
+    );
+  };
+
   const formatarData = (dataSql) => {
     const data = new Date(dataSql);
     return new Intl.DateTimeFormat('pt-BR', {
@@ -119,11 +129,11 @@ export default function Painel() {
     switch(status) {
       case 'pendente': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'concluido': return 'bg-green-100 text-green-800 border-green-200';
+      case 'avaliado': return 'bg-blue-100 text-blue-800 border-blue-200'; // 🚀 Nova cor para o status avaliado
       case 'cancelado': return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8 border-b pb-4">
@@ -170,10 +180,8 @@ export default function Painel() {
                 </p>
               </div>
 
-              {/* BOTÕES DE AÇÃO INTERATIVOS MODIFICADOS */}
               <div className="flex justify-end space-x-3 mt-auto pt-3 border-t border-gray-100">
                 
-                {/* 1. Cliente pode alterar o horário do serviço pendente */}
                 {usuario.tipo === 'cliente' && agendamento.status === 'pendente' && (
                   <button 
                     onClick={() => setAgendamentoEditando(agendamento)}
@@ -183,7 +191,6 @@ export default function Painel() {
                   </button>
                 )}
 
-                {/* 2. Ambos podem cancelar enquanto estiver pendente - Abre o Modal de Cancelar */}
                 {agendamento.status === 'pendente' && (
                   <button 
                     onClick={() => setModalCancelar({ aberto: true, id: agendamento.id })}
@@ -193,7 +200,6 @@ export default function Painel() {
                   </button>
                 )}
 
-                {/* 3. Só o prestador pode concluir o serviço pendente - Abre o Modal de Concluir */}
                 {usuario.tipo === 'prestador' && agendamento.status === 'pendente' && (
                   <button 
                     onClick={() => setModalConcluir({ aberto: true, id: agendamento.id })}
@@ -202,13 +208,21 @@ export default function Painel() {
                     Concluir Serviço
                   </button>
                 )}
+
+                {usuario.tipo === 'cliente' && agendamento.status === 'concluido' && (
+                  <button 
+                    onClick={() => setAgendamentoParaAvaliar(agendamento)}
+                    className="text-sm bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg font-bold transition-colors shadow-sm flex items-center gap-1"
+                  >
+                    ⭐ Avaliar Serviço
+                  </button>
+                )}
               </div>
             </div>
           ))}
         </div>
       )}  
 
-      {/* MODAL DE ALTERAR HORÁRIO */}
       {agendamentoEditando && (
         <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 relative">
@@ -242,7 +256,6 @@ export default function Painel() {
         </div>
       )}
 
-      {/* 🔥 MODAL DE CONFIRMAÇÃO DE CONCLUSÃO */}
       {modalConcluir.aberto && (
         <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 text-center">
@@ -274,7 +287,6 @@ export default function Painel() {
         </div>
       )}
 
-      {/* 🔥 MODAL DE CONFIRMAÇÃO DE CANCELAMENTO */}
       {modalCancelar.aberto && (
         <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 text-center">
@@ -304,6 +316,14 @@ export default function Painel() {
             </div>
           </div>
         </div>
+      )}
+
+      {agendamentoParaAvaliar && (
+        <ModalAvaliacao 
+          agendamento={agendamentoParaAvaliar} 
+          onClose={() => setAgendamentoParaAvaliar(null)} 
+          onAvaliacaoSucesso={handleAvaliacaoSucesso}
+        />
       )}
 
     </div>

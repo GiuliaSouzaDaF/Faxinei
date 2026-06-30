@@ -5,7 +5,7 @@ import pool from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import agendamentoRoutes from './routes/agendamentoRoutes.js';
-
+import avaliacaoRoutes from './routes/avaliacaoRoutes.js'; 
 dotenv.config();
 
 const app = express();
@@ -17,6 +17,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/agendamentos', agendamentoRoutes);
+app.use('/api/avaliacoes', avaliacaoRoutes); 
 
 app.get('/', (req, res) => {
     res.json({ mensagem: 'API do Faxinei está online e pronta para o trabalho!' });
