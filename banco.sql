@@ -31,19 +31,20 @@ CREATE TABLE IF NOT EXISTS agendamentos (
     FOREIGN KEY (cliente_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     FOREIGN KEY (prestador_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
-CREATE TABLE avaliacoes (
+CREATE TABLE IF NOT EXISTS avaliacoes (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    agendamento_id INT NOT NULL UNIQUE, -- UNIQUE garante que cada faxina só seja avaliada uma vez
+    agendamento_id INT NOT NULL UNIQUE, -- UNIQUE garante que cada agendamento seja avaliado apenas 1 vez
     cliente_id INT NOT NULL,
-    prestador_id INT NOT NULL,
-    nota INT NOT NULL CHECK (nota BETWEEN 1 AND 5), -- Força o banco a aceitar apenas de 1 a 5
+    prestador_id INT NOT NULL, -- Referencia o usuário prestador
+    nota INT NOT NULL CHECK (nota >= 1 AND nota <= 5), -- Validação a nível de banco de dados
     comentario TEXT,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
     FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE CASCADE,
     FOREIGN KEY (cliente_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     FOREIGN KEY (prestador_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
-ALTER TABLE usuarios ADD COLUMN descricao TEXT;
-ALTER TABLE usuarios ADD COLUMN preco_servico DECIMAL(10,2) DEFAULT 0.00;
-ALTER TABLE usuarios ADD COLUMN horario_atendimento VARCHAR(100);
+-- 2. Adicionar coluna de nota_media na tabela de perfis de prestadores
+ALTER TABLE perfil_prestador 
+ADD COLUMN nota_media DECIMAL(2,1) DEFAULT 0.0;
