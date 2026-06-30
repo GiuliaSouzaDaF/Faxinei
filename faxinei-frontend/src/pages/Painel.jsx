@@ -48,7 +48,7 @@ export default function Painel() {
 
   if (!usuario) return null;
 
-  const ejecutarConclusao = async () => {
+  const executarConclusao = async () => {
     const id = modalConcluir.id;
     setModalConcluir({ aberto: false, id: null });
     if (!id) return;
@@ -69,7 +69,7 @@ export default function Painel() {
     }
   };
 
-  const ejecutarCancelamento = async () => {
+  const executarCancelamento = async () => {
     const id = modalCancelar.id;
     setModalCancelar({ aberto: false, id: null });
     if (!id) return;
